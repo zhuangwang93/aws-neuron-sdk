@@ -137,7 +137,7 @@ The final evaluation results and ROUGE score are then printed in your terminal.
 LoRA Checkpoint
 ^^^^^^^^^^^^^^^^
 
-There are three checkpoint saving modes for LoRA fine-tuning and you can set different modes by enabling LoRA flags ``save_lora_base`` and ``merge_lora``.
+There are three checkpoint saving modes for LoRA fine-tuning and you can set different modes with LoRA flags ``save_lora_base`` and ``merge_lora``.
 
 * ``save_lora_base=False, merge_lora=False`` Save the LoRA adapter only.
 * ``save_lora_base=True, merge_lora=False`` Save both the base model and the LoRA adapter seperately.

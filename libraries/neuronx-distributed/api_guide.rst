@@ -405,6 +405,8 @@ Parameters:
    Note that if a checkpoint is saved with ``save_xser``, it needs to be loaded with ``load_xser``, vice versa.
 -  ``down_cast_bf16: (bool)``: This flag would downcast the state_dict to bf16 before saving.
 
+
+
 Load Checkpoint
 '''''''''''''''
 
@@ -441,6 +443,11 @@ Parameters:
    is necessary to pass the model object. Note: The keys in the
    state-dict should have the same name as in the model object, else it
    would raise an error.
+
+
+
+
+
 
 Gradient Clipping:
 ''''''''''''''''''
@@ -561,6 +568,7 @@ Initialize NxD config:
        pad_model=False,
        sequence_parallel=False,
        model_init_config=None,
+       lora_config=None,
    )
 
 This method initialize NxD training config and initialize model parallel. This config
@@ -597,6 +605,7 @@ Parameters:
   - ``meta_device_init``: whether to initialize model on meta device.
   - ``param_init_fn``: method that initialize parameters of modules, should be provided when
     ``param_init_fn`` is ``True``.
+- ``lora_config``: LoRA configuration. Default: :code:`None` with LoRA disabled.
 
 Initialize NxD Model Wrapper:
 '''''''''''''''''''''''''''''
@@ -662,6 +671,75 @@ Parameters:
 - ``parameters (iterable)``: parameters passed to the optimizer.
 - ``defaults``: optimizer options that will be passed to the optimizer.
 
+
+
+Enable LoRA fine-tuning:
+''''''''''''''''''''''
+
+LoRA model wrapper
+::
+
+   class LoRAModel(module: torch.nn.Module, LoraConfig)
+
+
+Parameters:
+
+- ``module``: module to be wrapped with LoRA
+
+- ``LoraConfig``: the LoRA configuration defined in neuronx_distributed.modules.lora.LoraConfig
+
+The flags in LoraConfig to initialize LoRA adapter:
+
+- ``enable_lora (bool)``: enable LoRA fine-tuning.
+
+- ``lora_rank (int)``: the rank of LoRA adapter
+
+- ``lora_alpha (float)``: the alpha parameter for Lora scaling.
+
+- ``lora_dropout (float)``: the dropout probability for Lora layers.
+
+- ``bias (str)``: bias type for LoRA. Can be `none`, `all` or `lora_only`.
+
+- ``target_modules (List[str])``: the names of the modules to apply LoRA adapter to.
+
+- ``use_rslora (bool)``: if True, uses Rank-Stabilized LoRA, which sets the adapter scaling factor to `lora_alpha/math.sqrt(lora_rank)`.
+
+- ``init_lora_weights (str)``: weights initialization of LoRA adapter. Can be `default` (initialized with torch.nn.init.kaiming_uniform_()) or `gaussian` (initialized with torch.nn.init.normal_()).
+
+
+Usage:
+   First define the LoRA configuration for fine-tuning. Suppose the target modules is `["q_proj", "v_proj", "k_proj"]`, 
+   it indicates that LoRA will be appied to modules whose name includes any of the keywords. 
+   An example is
+
+   ::
+
+      lora_config = neuronx_distributed.modules.lora.LoraConfig(
+         enable_lora=True,
+         lora_rank=16,
+         lora_alpha=32,
+         lora_dropout=0.05,
+         bias="none",
+         target_modules=["q_proj", "v_proj", "k_proj"],
+      )
+
+   Given a model that can be fit into the device memory, you can wrap the model with LoRA like so
+
+   ::
+      model = neuronx_distributed.modules.lora.LoRAModel(model, lora_config)
+   
+   For model with TP or PP, you can enable LoRA fine-tuning by setting `lora_config` in `neuronx_distributed_config()`.
+
+   ::
+
+      def neuronx_distributed.trainer.neuronx_distributed_config(
+         ...
+         lora_config=lora_config,
+      )
+   Then `initialize_parallel_model()` will initialize NxD model with LoRA adapter applied.
+
+
+
 Save Checkpoint:
 ''''''''''''''''
 
@@ -708,6 +786,25 @@ Parameters:
   will be ignored and maximum num of workers will be used. Default: :code:`False`.
 - ``num_kept_ckpts (int)``: number of checkpoints to keep on disk, optional. Default: :code:`None`.
 - ``async_save (bool)``: whether to use asynchronous saving method. Default: :code:`False`.
+
+
+Save LoRA Checkpoint:
+''''''''''''''''''''
+
+NxD also uses `neuronx_distributed.trainer.save_checkpoint()` to save LoRA models, but it requires to set ``save_lora_base`` and ``merge_lora`` in LoraConfig to specify how to save LoRA checkpoint.
+There are three LoRA checkpoint saving modes:
+
+* ``save_lora_base=False, merge_lora=False`` Save the LoRA adapter only.
+* ``save_lora_base=True, merge_lora=False`` Save both the base model and the LoRA adapter seperately.
+* ``save_lora_base=True, merge_lora=True`` Merge the LoRA adapter into the base model and then save the base model.
+
+
+Other than the adapter, NxD also needs to save the LoRA configuration file for LoRA loading. 
+The configuration can be saved into the same checkpoint with the adapter, or saved as a seperately json file.
+
+- ``save_lora_config_adapter (bool)`` If False, save the configuration file as a seperately json file.
+
+
 Load Checkpoint:
 ''''''''''''''''
 
@@ -739,6 +836,21 @@ Parameters:
 - ``num_workers (int)``: num of processes loading data on host at the same time.
   This is done to avoid the host OOM, range: 1-32.
 - ``strict (bool)``: whether to use strict mode when loading model checkpoint. Default: :code:`True`.
+
+
+Load LoRA Checkpoint:
+''''''''''''''''''''
+
+NxD loads LoRA checkpoints by setting flags in LoraConfig.
+
+- ``load_lora_from_ckpt=True``: resumes the checkpoint process.
+- ``lora_save_dir="lora_adapter"``: load LoRA checkpoint from the specified folder
+- ``lora_load_tag="lora"``: load the LoRA checkpoint with the specified tag
+
+LoRA checkpoint will be loaded during LoRA initialization. 
+Note that if LoRA configuration file is saved seperately, it is expected be placed as ``lora_adapter/adapter_config.json``.
+
+
 
 **Sample usage:**
 
