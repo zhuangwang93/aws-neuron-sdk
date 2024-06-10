@@ -3,8 +3,7 @@
 Fine-tuning Llama2 7B with tensor parallelism and LoRA using Neuron PyTorch-Lightning (``neuronx-distributed`` )
 =========================================================================================
 
-This tutorial shows how to fine-tune Llama2 7B with tensor parallelism and LoRA using Neuron PyTorch-Lightning APIs. For pre-training information, see the :ref:`Llama2 7B Tutorial <llama2_7b_tp_zero1_ptl_tutorial>`; 
-for full fine-tuning information, see the :ref:`Fine-tuning Llama2 7B Tutorial <finetuning_llama2_7b_ptl_tutorial>`; For additional context, 
+This tutorial shows how to fine-tune Llama2 7B with tensor parallelism and LoRA using Neuron PyTorch-Lightning APIs. For pre-training information, see the :ref:`Llama2 7B Tutorial <llama2_7b_tp_zero1_ptl_tutorial>`; For additional context, 
 see the :ref:`Neuron PT-Lightning Developer Guide <ptl_developer_guide>`. 
 
 
@@ -138,25 +137,23 @@ The final evaluation results and ROUGE score are then printed in your terminal.
 LoRA Checkpoint
 ^^^^^^^^^^^^^^^^
 
-There are three checkpoint saving modes for LoRA fine-tuning and you can set different modes by enabling different LoRA flags: 
-``save_lora_base`` and ``merge_lora``.
-
+There are three checkpoint saving modes for LoRA fine-tuning and you can set different modes by enabling LoRA flags ``save_lora_base`` and ``merge_lora``.
 
 * ``save_lora_base=False, merge_lora=False`` Save the LoRA adapter only.
 * ``save_lora_base=True, merge_lora=False`` Save both the base model and the LoRA adapter seperately.
 * ``save_lora_base=True, merge_lora=True`` Merge the LoRA adapter into the base model and then save the base model.
 
 
-Other than the adapter, LoRA also needs to save the lora configuration file for adapter loading. 
-You can save the configuration into the same checkpoint with the adapter, or save it as a seperately json file.
+Other than the adapter, LoRA also needs to save the LoRA configuration file for adapter loading. 
+The configuration can be saved into the same checkpoint with the adapter, or saved as a seperately json file.
 An example of LoRA flags for LoRA saving is
 
 .. code:: ipython3
 
    lora_config = LoraConfig(
-      save_lora_base=False,   # do not save the base model
+      save_lora_base=False,   # save the LoRA adapter only
       merge_lora=False,       # do not merge LoRA adapter into the base model
-      save_lora_config_adapter,  # save LoRA checkpoint and configuration file in the same checkpoint
+      save_lora_config_adapter=True,  # save LoRA checkpoint and configuration file in the same checkpoint
    )
 
 After adding these flags, users can save LoRA model with 
@@ -166,6 +163,7 @@ After adding these flags, users can save LoRA model with
    import neuronx_distributed as nxd
    nxd.save_checkpoint(checkpoint_dir_str="lora_adapter", tag="lora", model=model)
 
+The LoRA adapter will be save under folder ``lora_adapter/lora/``.
 
 To enable checkpoint loading, add the following LoRA flags:
 
@@ -174,4 +172,4 @@ To enable checkpoint loading, add the following LoRA flags:
 * ``lora_load_tag="lora"`` Load the LoRA checkpoint with the specified tag
 
 LoRA checkpoint will be loaded during LoRA initialization. 
-Note that if LoRA configuration file is saved seperately, it should be placed as ``f{lora_save_dir}/adapter_config.json``.
+Note that if LoRA configuration file is saved seperately, it should be placed as ``lora_adapter/adapter_config.json``.
