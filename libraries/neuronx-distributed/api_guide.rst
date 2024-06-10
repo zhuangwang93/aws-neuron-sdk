@@ -679,32 +679,32 @@ Enable LoRA fine-tuning:
 LoRA model wrapper
 ::
 
-   class LoRAModel(module: torch.nn.Module, LoraConfig)
+   class LoRAModel(module, LoraConfig)
 
 
 Parameters:
 
-- ``module``: module to be wrapped with LoRA
+- ``module (torch.nn.Module)``: Module to be wrapped with LoRA
 
-- ``LoraConfig``: the LoRA configuration defined in neuronx_distributed.modules.lora.LoraConfig
+- ``LoraConfig``: The LoRA configuration defined in neuronx_distributed.modules.lora.LoraConfig
 
 The flags in LoraConfig to initialize LoRA adapter:
 
-- ``enable_lora (bool)``: enable LoRA fine-tuning.
+- ``enable_lora (bool)``: Enable LoRA fine-tuning.
 
-- ``lora_rank (int)``: the rank of LoRA adapter
+- ``lora_rank (int)``: The rank of LoRA adapter
 
-- ``lora_alpha (float)``: the alpha parameter for Lora scaling.
+- ``lora_alpha (float)``: The alpha parameter for Lora scaling.
 
-- ``lora_dropout (float)``: the dropout probability for Lora layers.
+- ``lora_dropout (float)``: The dropout probability for Lora layers.
 
-- ``bias (str)``: bias type for LoRA. Can be `none`, `all` or `lora_only`.
+- ``bias (str)``: Bias type for LoRA. Can be `none`, `all` or `lora_only`.
 
-- ``target_modules (List[str])``: the names of the modules to apply LoRA adapter to.
+- ``target_modules (List[str])``: The names of the modules to apply LoRA adapter to.
 
-- ``use_rslora (bool)``: if True, uses Rank-Stabilized LoRA, which sets the adapter scaling factor to `lora_alpha/math.sqrt(lora_rank)`.
+- ``use_rslora (bool)``: If True, uses Rank-Stabilized LoRA, which sets the adapter scaling factor to `lora_alpha/math.sqrt(lora_rank)`.
 
-- ``init_lora_weights (str)``: weights initialization of LoRA adapter. Can be `default` (initialized with torch.nn.init.kaiming_uniform_()) or `gaussian` (initialized with torch.nn.init.normal_()).
+- ``init_lora_weights (str)``: Weights initialization of LoRA adapter. Can be `default` (initialized with torch.nn.init.kaiming_uniform_()) or `gaussian` (initialized with torch.nn.init.normal_()).
 
 
 Usage:
@@ -843,9 +843,9 @@ Load LoRA Checkpoint:
 
 NxD loads LoRA checkpoints by setting flags in LoraConfig.
 
-- ``load_lora_from_ckpt=True``: resumes the checkpoint process.
-- ``lora_save_dir="lora_adapter"``: load LoRA checkpoint from the specified folder
-- ``lora_load_tag="lora"``: load the LoRA checkpoint with the specified tag
+- ``load_lora_from_ckpt=True``: Resumes the checkpoint process.
+- ``lora_save_dir="lora_adapter"``: Load LoRA checkpoint from the specified folder
+- ``lora_load_tag="lora"``: Load the LoRA checkpoint with the specified tag
 
 LoRA checkpoint will be loaded during LoRA initialization. 
 Note that if LoRA configuration file is saved seperately, it is expected be placed as ``lora_adapter/adapter_config.json``.
