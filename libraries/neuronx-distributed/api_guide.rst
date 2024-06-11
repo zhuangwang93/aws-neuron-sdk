@@ -713,6 +713,7 @@ Usage:
    An example is
 
    ::
+
       lora_config = neuronx_distributed.modules.lora.LoraConfig(
          enable_lora=True,
          lora_rank=16,
@@ -722,10 +723,13 @@ Usage:
          target_modules=["q_proj", "v_proj", "k_proj"],
       )
 
+
    Given a model that can be fit into the device memory, you can wrap the model with LoRA like so
 
    ::
+
       model = neuronx_distributed.modules.lora.LoRAModel(model, lora_config)
+   
    
    For model with TP or PP, you can enable LoRA fine-tuning like so
 
@@ -735,6 +739,8 @@ Usage:
          ...
          lora_config=lora_config,
       )
+
+
    Then ``initialize_parallel_model()`` will initialize NxD model with LoRA adapter applied.
 
 
