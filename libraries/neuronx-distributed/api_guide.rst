@@ -698,22 +698,21 @@ The flags in LoraConfig to initialize LoRA adapter:
 
 - ``lora_dropout (float)``: The dropout probability for Lora layers.
 
-- ``bias (str)``: Bias type for LoRA. Can be `none`, `all` or `lora_only`.
+- ``bias (str)``: Bias type for LoRA. Can be ``none``, ``all`` or ``lora_only``.
 
 - ``target_modules (List[str])``: The names of the modules to apply LoRA adapter to.
 
-- ``use_rslora (bool)``: If True, uses Rank-Stabilized LoRA, which sets the adapter scaling factor to `lora_alpha/math.sqrt(lora_rank)`.
+- ``use_rslora (bool)``: If True, uses Rank-Stabilized LoRA, which sets the adapter scaling factor to ``lora_alpha/math.sqrt(lora_rank)``.
 
-- ``init_lora_weights (str)``: Weights initialization of LoRA adapter. Can be `default` (initialized with torch.nn.init.kaiming_uniform_()) or `gaussian` (initialized with torch.nn.init.normal_()).
+- ``init_lora_weights (str)``: Weights initialization of LoRA adapter. Can be ``default`` (initialized with ``torch.nn.init.kaiming_uniform_()``) or ``gaussian`` (initialized with ``torch.nn.init.normal_()``).
 
 
 Usage:
-   First define the LoRA configuration for fine-tuning. Suppose the target modules is `["q_proj", "v_proj", "k_proj"]`, 
+   First define the LoRA configuration for fine-tuning. Suppose the target modules is ``[q_proj, v_proj, k_proj]``, 
    it indicates that LoRA will be appied to modules whose name includes any of the keywords. 
    An example is
 
    ::
-
       lora_config = neuronx_distributed.modules.lora.LoraConfig(
          enable_lora=True,
          lora_rank=16,
@@ -728,7 +727,7 @@ Usage:
    ::
       model = neuronx_distributed.modules.lora.LoRAModel(model, lora_config)
    
-   For model with TP or PP, you can enable LoRA fine-tuning by setting `lora_config` in `neuronx_distributed_config()`.
+   For model with TP or PP, you can enable LoRA fine-tuning like so
 
    ::
 
@@ -736,7 +735,7 @@ Usage:
          ...
          lora_config=lora_config,
       )
-   Then `initialize_parallel_model()` will initialize NxD model with LoRA adapter applied.
+   Then ``initialize_parallel_model()`` will initialize NxD model with LoRA adapter applied.
 
 
 
